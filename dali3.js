@@ -5,63 +5,67 @@ let daliElements = [];
 // dynamically add elements to dali array
 // addData takes in array of objects and sends them
 // one by one to createDali
-const addData = function(arr) {
-    for (let obj in arr) {
-        let dali = createDali(arr[obj]);
+const addData = function( arr ) {
+    for ( let obj in arr ) {
+        let dali = createDali( arr[obj] );
     }
 }
 
 // create a dali object and push to array
 // createDali takes in obj props which contains 1 dali elements
-const createDali = function(props) {
+const createDali = function( props) {
     let temp = {},
-        elArray = document.querySelectorAll(props.el);
+        elArray = document.querySelectorAll( props.el );
     // elArray pulls all elements from the DOM into an array
-    for (let i = 0; i < elArray.length; i++) {
+    for ( let i = 0; i < elArray.length; i++ ) {
         // for each element in elArray, create a new temporary dali using props[i]
-        for (let prop in props) {
+        for ( let prop in props ) {
             temp[prop] = props[prop]
         }
         // overwrite the 'el' property with the elArray[i] element
         temp.el = elArray[i]
 
         // send these settings to create a new Dali
-        const dali = new Dali(temp);
+        const dali = new Dali( temp );
         // Push to dali array
-        daliElements.push(dali);
+        daliElements.push( dali );
     }
 }
 
 // create Dali object
 class Dali {
-    constructor(props) {
-        for (let prop in props) {
+    constructor( props ) {
+        for ( let prop in props ) {
             this[prop] = props[prop];
         }
         // initialize all style attributes
         // ie: transition, delay, etc
-        if (props.style) {
-            for (let attr in props.style) {
+        if ( props.style ) {
+            for ( let attr in props.style ) {
                 this.el.style[attr] = props.style[attr];
             }
         }
-
     }
 
-    addAni() {
-        this.el.classList.add(this.ani);
+    fire() {
+        this.addAni()
+        this.unsubscribe()
+    }
+
+    addAni(_this) {
+        this.el.classList.add( this.ani );
     }
 
     removeAni() {
-        this.el.classList.remove(this.ani);
+        this.el.classList.remove( this.ani );
     }
 
     addReverse() {
-        this.el.classList.add(this.reverse);
+        this.el.classList.add( this.reverse );
     }
 
     removeReverse() {
-        this.el.classList.remove(this.reverse);
+        this.el.classList.remove( this.reverse );
     }
 
     calcTop() {
@@ -73,46 +77,45 @@ class Dali {
     }
 
     getTrigger() {
-        return (window.innerHeight / 3) * 2;
+        return ( window.innerHeight / 3 ) * 2;
     }
 
-    setTrigger(newTrigger) {
+    setTrigger( newTrigger ) {
         this.getTrigger = function() {
-            return (newTrigger);
+            return ( newTrigger );
         }
     }
 
     subscribe() {
         // subscribe to observer
-        watcher.watchedElements.push(this)
+        observer.watchedElements.push( this )
     }
 
     unsubscribe() {
         // unscubscribe from observer
-        let index = watcher.watchedElements.indexOf(this);
+        let index = observer.watchedElements.indexOf( this );
         if (index !== -1) {
-            watcher.watchedElements.splice(index, 1);
+            observer.watchedElements.splice( index, 1 );
         }
     }
 }
 
-class Watcher {
+class Observer {
     constructor() {
         this.watchedElements = [];
-        this.triggerPoint = (window.innerHeight / 3) * 2;
+        this.triggerPoint = ( window.innerHeight / 3 ) * 2;
     }
 
     watch() {
-        for (let i in this.watchedElements) {
-            if (this.watchedElements[i].calcTop() < this.watchedElements[i].getTrigger()) {
-                this.update(this.watchedElements[i])
+        for ( let i in this.watchedElements ) {
+            if ( this.watchedElements[i].calcTop() < this.watchedElements[i].getTrigger() ) {
+                this.update( this.watchedElements[i] )
             }
         }
     }
 
-    update(dali) {
-        dali.addAni();
-        dali.unsubscribe();
+    update( dali ) {
+        dali.fire();
     }
 }
 
@@ -120,38 +123,40 @@ class Watcher {
 
 
 
+// INITIALIZE DALI - NEEDS TO BE BROKE OUT INTO INIT FUNCTION
 
 
-
-
-const watcher = new Watcher();
-
-window.onscroll = function() {
-    watcher.watch()
+addData([{
+    el: '#save-a-life',
+    ani: 'something',
+    reverse: 'slizzurp'
+},
+{
+    el: '.why-text',
+    ani: 'faq-card',
+    fadeIn: 'true', // if (fadeIn) { add overlay to hide object until addAni() };
+    style: {
+        transition: '1s linear'
+    },
+    log: function() {
+        console.log( this );
+    }
 }
+])
+
+const observer = new Observer();
 
 const subscribeAll = function() {
-    for (let dali in daliElements) {
+    for ( let dali in daliElements ) {
         daliElements[dali].subscribe();
     }
 }
 
-addData([{
-        el: '#save-a-life',
-        ani: 'something',
-        reverse: 'slizzurp'
-    },
-    {
-        el: '.why-text',
-        ani: 'animation',
-        fadeIn: 'true', // if (fadeIn) { add overlay to hide object until addAni() };
-        style: {
-            transition: '1s linear'
-        },
-        log: function() {
-            console.log(this);
-        }
-    }
-])
-
 subscribeAll();
+
+window.onscroll = function() {
+    // if scrollDirection == down
+    observer.watch();
+    // if scrollDirection == up
+    // observer.watchReverse()
+}
