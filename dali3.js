@@ -5,10 +5,9 @@ let daliElements = [];
 // dynamically add elements to dali array
 // addData takes in array of objects and sends them
 // one by one to createDali
-const addData = function (objs) {
-  for ( let i in objs ) {
-    let dali = createDali(objs[i]);
-    daliElements.push(dali);
+const addData = function (arr) {
+  for ( let obj in arr ) {
+    let dali = createDali(arr[obj]);
   }
 }
 
@@ -17,6 +16,7 @@ const addData = function (objs) {
 const createDali = function(props) {
   let temp = {},
       elArray = document.querySelectorAll(props.el);
+      console.log(elArray)
       // elArray pulls all elements from the DOM into an array
   for ( let i = 0; i < elArray.length; i++){
     // for each element in elArray, create a new temporary dali using props[i]
@@ -28,8 +28,8 @@ const createDali = function(props) {
 
     // send these settings to create a new Dali
     const dali = new Dali(temp);
-
-    return dali
+    // Push to dali array
+    daliElements.push(dali);
   }
 }
 
@@ -65,29 +65,66 @@ class Dali {
     this.el.classList.remove(this.reverse);
   }
 
-  calcTop() {
+  get top() {
       return this.el.getBoundingClientRect().top;
   }
 
-  calcLeft() {
+  get left() {
       return this.el.getBoundingClientRect().left;
+  }
+
+  get triggerPoint(){
+      return (window.innerHeight / 3) * 2;
+  }
+
+  set triggerPoint(){
+      this.g
   }
 
   subscribe() {
       // subscribe to observer
+      watcher.watchedElements.push(this)
   }
 
-  unscubscribe() {
+    unsubscribe() {
       // unscubscribe from observer
-  }
+      let index = watcher.watchedElements.indexOf(this);
+      if(index !== -1) {
+        watcher.watchedElements.splice(index, 1);
+      }
+    }
+}
 
+const subscribeAll = function () {
+    for (let dali in daliElements) {
+        daliElements[dali].subscribe();
+    }
 }
 
 
 
 
+class Watcher {
+    constructor (){
+        this.watchedElements = [];
+        this.triggerPoint = (window.innerHeight / 3) * 2;
+    }
 
+    watch() {
+        for ( let i in this.watchedElements ){
+            if ( this.watchedElements[i].top() < this.watchedElements.triggerPoint ) {
+                this.watchedElements[i].addAni();
+                this.watchedElements[i].unsubscribe();
+            }
+        }
+    }
+}
 
+const watcher = new Watcher();
+
+window.onscroll = function() {
+    watcher.watch()
+}
 
 
 
@@ -110,3 +147,5 @@ addData([
     }
   }
 ])
+
+subscribeAll();
