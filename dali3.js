@@ -48,7 +48,7 @@ class Dali {
     }
 
     fire() {
-        this.addAni()
+        this.removeAni()
         this.unsubscribe()
     }
 
@@ -77,7 +77,7 @@ class Dali {
     }
 
     getTrigger() {
-        return ( window.innerHeight / 3 ) * 2;
+        return ( window.innerHeight / 2 );
     }
 
     setTrigger( newTrigger ) {
@@ -126,22 +126,14 @@ class Observer {
 // INITIALIZE DALI - NEEDS TO BE BROKE OUT INTO INIT FUNCTION
 
 
-addData([{
-    el: '#save-a-life',
-    ani: 'something',
-    reverse: 'slizzurp'
-},
-{
-    el: '.why-text',
-    ani: 'faq-card',
-    fadeIn: 'true', // if (fadeIn) { add overlay to hide object until addAni() };
-    style: {
-        transition: '1s linear'
-    },
-    log: function() {
-        console.log( this );
+addData([
+    {
+        el: '.orange-slice-container',
+        ani: 'slide-in-right',
+        style: {
+            transition: '1s ease-in-out'
+        }
     }
-}
 ])
 
 const observer = new Observer();
@@ -149,14 +141,12 @@ const observer = new Observer();
 const subscribeAll = function() {
     for ( let dali in daliElements ) {
         daliElements[dali].subscribe();
+        daliElements[dali].el.classList.add(daliElements[dali].ani)
     }
 }
 
 subscribeAll();
 
 window.onscroll = function() {
-    // if scrollDirection == down
     observer.watch();
-    // if scrollDirection == up
-    // observer.watchReverse()
 }
