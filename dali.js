@@ -229,8 +229,8 @@ let Dali = (function() {
 
 Dali.init({
     dalis: [{
-        el: '.orange-slice-container',
-        ani: 'slide-in-right',
+        el: '',
+        ani: '',
         style: {
             transition: '1s ease-in-out'
         }
